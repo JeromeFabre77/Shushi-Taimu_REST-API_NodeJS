@@ -1,20 +1,84 @@
 import express, { Request, Response } from 'express';
 import { PrismaClient, Box, Prisma } from '@prisma/client';
+import bodyParser from 'body-parser';
+
 
 const prisma = new PrismaClient();
 const app = express();
 const port = 3000;
+app.use(bodyParser.json());
 
 type BoxWithRelations = Prisma.BoxGetPayload<{
     include: { aliments: true; saveurs: true }
 }>;
 
-// app.post creer
-app.put('/add-box', async (req: Request, res: Response) => {
+app.post('/box', async (req: Request, res: Response) => {
+    const { nom, pieces, prix, image } = req.body;
 
-})
+    // Vérifiez si tous les champs nécessaires sont présents
+    if (!nom || !pieces || !prix || !image) {
+        return res.status(400).json({ error: "Tous les champs sont requis" });
+    }
 
-app.delete('/delete-box/:id', async (req: Request, res: Response) => {
+    try {
+        const newBox = await prisma.box.create({
+            data: {
+                nom: String(nom),
+                pieces: Number(pieces),
+                prix: Number(prix),
+                image: String(image),
+            },
+        });
+        res.json(newBox);
+    } catch (error) {
+        res.status(500).json({ error: 'Une erreur est survenue lors de la création de la box' });
+    }
+
+});
+
+
+app.put('/box/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { nom, pieces, prix, image } = req.body;
+
+    // Vérifiez si tous les champs nécessaires sont présents
+    if (!nom || !pieces || !prix || !image) {
+        return res.status(400).json({ error: "Tous les champs sont requis" });
+    }
+
+    try {
+        const box = await prisma.box.findUnique({
+            where: {
+                id: Number(id)
+            }
+        });
+
+        // Vérifiez si la box existe
+        if (!box) {
+            return res.status(404).json({ error: `Aucune box trouvée avec l'id ${id}` });
+        }
+
+        const updatedBox = await prisma.box.update({
+            where: {
+                id: Number(id)
+            },
+            data:
+            {
+                nom: String(nom),
+                pieces: Number(pieces),
+                prix: Number(prix),
+                image: String(image)
+            },
+        });
+
+        res.json(updatedBox);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: `Une erreur est survenue lors de la modification de la box avec l'id ${id}` });
+    }
+});
+
+app.delete('/box/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
 
     try {
