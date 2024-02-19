@@ -3,8 +3,6 @@ import { PrismaClient, Box, Prisma } from '@prisma/client';
 import bodyParser from 'body-parser';
 
 
-
-
 const prisma = new PrismaClient();
 const app = express();
 const port = 3000;
@@ -14,8 +12,13 @@ type BoxWithRelations = Prisma.BoxGetPayload<{
     include: { aliments: true; saveurs: true }
 }>;
 
-app.post('/creer-box', async (req: Request, res: Response) => {
+app.post('/box', async (req: Request, res: Response) => {
     const { nom, pieces, prix, image } = req.body;
+
+    // Vérifiez si tous les champs nécessaires sont présents
+    if (!nom || !pieces || !prix || !image) {
+        return res.status(400).json({ error: "Tous les champs sont requis" });
+    }
 
     try {
         const newBox = await prisma.box.create({
@@ -34,7 +37,7 @@ app.post('/creer-box', async (req: Request, res: Response) => {
 });
 
 
-app.put('/modif-box/:id', async (req: Request, res: Response) => {
+app.put('/box/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { nom, pieces, prix, image } = req.body;
 
@@ -44,7 +47,11 @@ app.put('/modif-box/:id', async (req: Request, res: Response) => {
     }
 
     try {
-        const box = await prisma.box.findUnique({ where: { id: Number(id) } });
+        const box = await prisma.box.findUnique({
+            where: {
+                id: Number(id)
+            }
+        });
 
         // Vérifiez si la box existe
         if (!box) {
@@ -52,8 +59,16 @@ app.put('/modif-box/:id', async (req: Request, res: Response) => {
         }
 
         const updatedBox = await prisma.box.update({
-            where: { id: Number(id) },
-            data: { nom, pieces: Number(pieces), prix: Number(prix), image },
+            where: {
+                id: Number(id)
+            },
+            data:
+            {
+                nom: String(nom),
+                pieces: Number(pieces),
+                prix: Number(prix),
+                image: String(image)
+            },
         });
 
         res.json(updatedBox);
@@ -63,7 +78,7 @@ app.put('/modif-box/:id', async (req: Request, res: Response) => {
     }
 });
 
-app.delete('/delete-box/:id', async (req: Request, res: Response) => {
+app.delete('/box/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
 
     try {
