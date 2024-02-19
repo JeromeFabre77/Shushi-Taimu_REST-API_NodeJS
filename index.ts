@@ -1,18 +1,42 @@
 import express, { Request, Response } from 'express';
 import { PrismaClient, Box, Prisma } from '@prisma/client';
+import bodyParser from 'body-parser';
+
+
+
 
 const prisma = new PrismaClient();
 const app = express();
 const port = 3000;
+app.use(bodyParser.json());
 
 type BoxWithRelations = Prisma.BoxGetPayload<{
     include: { aliments: true; saveurs: true }
 }>;
 
-// app.post creer
-app.put('/add-box', async (req: Request, res: Response) => {
+app.post('/creer-box', async (req: Request, res: Response) => {
+    const { nom, pieces, prix, image } = req.body;
 
-})
+    try {
+        const newBox = await prisma.box.create({
+            data: {
+                nom: String(nom),
+                pieces: Number(pieces),
+                prix: Number(prix),
+                image: String(image),
+            },
+        });
+        res.json(newBox);
+    } catch (error) {
+        res.status(500).json({ error: 'Une erreur est survenue lors de la création de la box' });
+    }
+
+});
+
+
+// app.put('/add-box/:id', async (req: Request, res: Response) => {
+
+// })
 
 app.delete('/delete-box/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
