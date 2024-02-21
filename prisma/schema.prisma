@@ -37,8 +37,9 @@ model Saveurs {
 }
 
 model Commandes {
-  id    Int      @id @default(autoincrement())
-  date  DateTime @default(now())
-  boxId Int
-  box   Box      @relation(fields: [boxId], references: [id])
+  id     Int      @id @default(autoincrement())
+  date   DateTime @default(now())
+  prix_t Float
+  boxId  Int
+  box    Box      @relation(fields: [boxId], references: [id])
 }
