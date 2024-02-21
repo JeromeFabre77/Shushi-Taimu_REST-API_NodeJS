@@ -149,14 +149,28 @@ app.delete('/box/:id', async (req: Request, res: Response) => {
     }
 });
 
-//Affichage de toute les box
+//Affichage de toutes les box si le body est vide sinon affiche par id
 app.get('/box', async (req: Request, res: Response) => {
-    const result = await prisma.box.findMany({
-        include: {
-            aliments: true,
-            saveurs: true,
-        },
-    });
+    const id = req.body;
+    console.log(JSON.stringify(id));
+    if (JSON.stringify(id) != "{}") {
+        var result = await prisma.box.findMany({
+            where: {
+                OR: id
+            },
+            include: {
+                aliments: true,
+                saveurs: true,
+            },
+        });
+    } else {
+        var result = await prisma.box.findMany({
+            include: {
+                aliments: true,
+                saveurs: true,
+            },
+        });
+    }
 
     const uniqueResult = (result as BoxWithRelations[]).map(box => {
         const uniqueAliments = Array.from(new Set(box.aliments.map(a => a.nom)))
@@ -184,5 +198,5 @@ app.get('/box', async (req: Request, res: Response) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+    console.log(`Le serveur est lancé à l'adresse http://localhost:${port}`);
 });
