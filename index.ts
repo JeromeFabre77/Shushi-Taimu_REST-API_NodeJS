@@ -1,6 +1,7 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { PrismaClient, Box, Prisma } from '@prisma/client';
 import bodyParser from 'body-parser';
+import jwt from 'jsonwebtoken';
 
 
 const prisma = new PrismaClient();
@@ -12,6 +13,48 @@ type BoxWithRelations = Prisma.BoxGetPayload<{
     include: { aliments: true; saveurs: true }
 }>;
 
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+//Box
+
+//Création de saveurs dans une box
+app.post('/box/saveurs', async (req: Request, res: Response) => {
+    const saveurs = req.body;
+
+    if (!saveurs) {
+        return res.json(`Tous les champs sont requis`);
+    }
+
+    try {
+        const newSav = await prisma.saveurs.createMany({
+            data: saveurs,
+            skipDuplicates: true
+        })
+        res.send(newSav);
+    } catch (error) {
+        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre saveur ${JSON.stringify(saveurs)}` });
+    }
+})
+
+//Création d'aliments dans une box
+app.post('/box/aliments', async (req: Request, res: Response) => {
+    const aliments = req.body;
+
+    if (!aliments) {
+        return res.status(400).json({ error: "Tous les champs sont requis" });
+    }
+
+    try {
+        const newAlim = await prisma.aliments.createMany({
+            data: aliments,
+            skipDuplicates: true
+        })
+        res.json(newAlim);
+    } catch (error) {
+        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre saveur ${JSON.stringify(aliments)}` });
+    }
+})
+
+//Création de box
 app.post('/box', async (req: Request, res: Response) => {
     const { nom, pieces, prix, image } = req.body;
 
@@ -36,7 +79,7 @@ app.post('/box', async (req: Request, res: Response) => {
 
 });
 
-
+//Modification d'une box par id
 app.put('/box/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { nom, pieces, prix, image } = req.body;
@@ -78,6 +121,7 @@ app.put('/box/:id', async (req: Request, res: Response) => {
     }
 });
 
+//Delete une box par id
 app.delete('/box/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
 
@@ -105,6 +149,7 @@ app.delete('/box/:id', async (req: Request, res: Response) => {
     }
 });
 
+//Affichage de toute les box
 app.get('/box', async (req: Request, res: Response) => {
     const result = await prisma.box.findMany({
         include: {
