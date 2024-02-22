@@ -8,13 +8,52 @@ const prisma = new PrismaClient();
 const app = express();
 const port = 3000;
 app.use(bodyParser.json());
-
 type BoxWithRelations = Prisma.BoxGetPayload<{
     include: { aliments: true; saveurs: true }
 }>;
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Box
+
+//Modification d'une saveur à partir de son id
+app.put('/box/saveurs/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { nom, boxId } = req.body;
+
+    // Vérifiez si tous les champs nécessaires sont présents
+    if (!nom || !boxId) {
+        return res.status(400).json({ error: "Tous les champs sont requis" });
+    }
+
+    try {
+        const saveurs = await prisma.saveurs.findUnique({
+            where: {
+                id: Number(id)
+            }
+        });
+
+        // Vérifiez si l'aliment existe
+        if (!saveurs) {
+            return res.status(404).json({ error: `Aucune saveur trouvée avec l'id ${id}` });
+        }
+
+        const updatedSav = await prisma.saveurs.update({
+            where: {
+                id: Number(id)
+            },
+            data:
+            {
+                nom: String(nom),
+                boxId: Number(boxId)
+            },
+        });
+
+        res.json(updatedSav);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: `Une erreur est survenue lors de la modification de la saveur avec l'id ${id}` });
+    }
+});
 
 //Création de saveurs dans une box
 app.post('/box/saveurs', async (req: Request, res: Response) => {
@@ -34,6 +73,47 @@ app.post('/box/saveurs', async (req: Request, res: Response) => {
         res.status(500).json({ error: `Une erreur est survenue lors de la création de votre saveur ${JSON.stringify(saveurs)}` });
     }
 })
+
+//Modification d'un aliments à partir de son id
+app.put('/box/aliments/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { nom, quantite, boxId } = req.body;
+
+    // Vérifiez si tous les champs nécessaires sont présents
+    if (!nom || !quantite || !boxId) {
+        return res.status(400).json({ error: "Tous les champs sont requis" });
+    }
+
+    try {
+        const aliments = await prisma.aliments.findUnique({
+            where: {
+                id: Number(id)
+            }
+        });
+
+        // Vérifiez si l'aliment existe
+        if (!aliments) {
+            return res.status(404).json({ error: `Aucun aliment trouvée avec l'id ${id}` });
+        }
+
+        const updatedAlim = await prisma.aliments.update({
+            where: {
+                id: Number(id)
+            },
+            data:
+            {
+                nom: String(nom),
+                quantite: Number(quantite),
+                boxId: Number(boxId)
+            },
+        });
+
+        res.json(updatedAlim);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: `Une erreur est survenue lors de l'aliment de la box avec l'id ${id}` });
+    }
+});
 
 //Création d'aliments dans une box
 app.post('/box/aliments', async (req: Request, res: Response) => {
@@ -149,14 +229,27 @@ app.delete('/box/:id', async (req: Request, res: Response) => {
     }
 });
 
-//Affichage de toute les box
+//Affichage de toutes les box si le body est vide sinon affiche par id
 app.get('/box', async (req: Request, res: Response) => {
-    const result = await prisma.box.findMany({
-        include: {
-            aliments: true,
-            saveurs: true,
-        },
-    });
+    const id = req.body;
+    if (JSON.stringify(id) != "{}") {
+        var result = await prisma.box.findMany({
+            where: {
+                OR: id
+            },
+            include: {
+                aliments: true,
+                saveurs: true,
+            },
+        });
+    } else {
+        var result = await prisma.box.findMany({
+            include: {
+                aliments: true,
+                saveurs: true,
+            },
+        });
+    }
 
     const uniqueResult = (result as BoxWithRelations[]).map(box => {
         const uniqueAliments = Array.from(new Set(box.aliments.map(a => a.nom)))
@@ -184,5 +277,5 @@ app.get('/box', async (req: Request, res: Response) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+    console.log(`Le serveur est lancé à l'adresse http://localhost:${port}`);
 });
