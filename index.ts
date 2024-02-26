@@ -7,10 +7,46 @@ import jwt from 'jsonwebtoken';
 const prisma = new PrismaClient();
 const app = express();
 const port = 3000;
+
 app.use(bodyParser.json());
+
 type BoxWithRelations = Prisma.BoxGetPayload<{
     include: { aliments: true; saveurs: true }
 }>;
+
+type ComWithRelations = Prisma.CommandesGetPayload<{
+    include: { box: true }
+}>;
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+//Commande
+
+//Affichage de toutes les commandes si le body est vide sinon affiche par id
+app.get('/commandes', async (req: Request, res: Response) => {
+    const id = req.body;
+    if (JSON.stringify(id) != "{}") {
+        var result = await prisma.commandes.findMany({
+            where: {
+                OR: id
+            },
+            include: {
+                box: true
+            },
+        });
+    } else {
+        var result = await prisma.commandes.findMany({
+            include: {
+                box: true
+            },
+        });
+    }
+
+    const uniqueBox = (result as ComWithRelations[])
+
+    res.send(`<pre>${JSON.stringify(uniqueBox, null, 2)}</pre>`);
+});
+
+
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Box
@@ -136,28 +172,22 @@ app.post('/box/aliments', async (req: Request, res: Response) => {
 
 //Création de box
 app.post('/box', async (req: Request, res: Response) => {
-    const { nom, pieces, prix, image } = req.body;
+    const box = req.body;
 
-    // Vérifiez si tous les champs nécessaires sont présents
-    if (!nom || !pieces || !prix || !image) {
-        return res.status(400).json({ error: "Tous les champs sont requis" });
+    if (!box) {
+        return res.json(`Tous les champs sont requis`);
     }
 
     try {
-        const newBox = await prisma.box.create({
-            data: {
-                nom: String(nom),
-                pieces: Number(pieces),
-                prix: Number(prix),
-                image: String(image),
-            },
-        });
-        res.json(newBox);
+        const newBox = await prisma.box.createMany({
+            data: box,
+            skipDuplicates: true
+        })
+        res.send(newBox);
     } catch (error) {
-        res.status(500).json({ error: 'Une erreur est survenue lors de la création de la box' });
+        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre saveur ${JSON.stringify(box)}` });
     }
-
-});
+})
 
 //Modification d'une box par id
 app.put('/box/:id', async (req: Request, res: Response) => {
