@@ -11,14 +11,14 @@ datasource db {
 }
 
 model Box {
-  id        Int         @id @default(autoincrement())
-  nom       String
-  pieces    Int
-  prix      Float
-  image     String
-  aliments  Aliments[]
-  saveurs   Saveurs[]
-  commandes Commandes[]
+  id       Int        @id @default(autoincrement())
+  nom      String
+  pieces   Int
+  prix     Float
+  image    String
+  aliments Aliments[]
+  saveurs  Saveurs[]
+  boxtocom BoxToCom[]
 }
 
 model Aliments {
@@ -37,9 +37,16 @@ model Saveurs {
 }
 
 model Commandes {
-  id     Int      @id @default(autoincrement())
-  date   DateTime @default(now())
-  prix_t Float
-  boxId  Int
-  box    Box      @relation(fields: [boxId], references: [id])
+  id       Int        @id @default(autoincrement())
+  date     DateTime   @default(now())
+  prix_t   Float
+  boxtocom BoxToCom[]
+}
+
+model BoxToCom {
+  id        Int       @id @default(autoincrement())
+  boxId     Int
+  box       Box       @relation(fields: [boxId], references: [id])
+  comId     Int
+  commandes Commandes @relation(fields: [comId], references: [id])
 }
