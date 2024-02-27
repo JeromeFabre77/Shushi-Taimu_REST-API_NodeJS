@@ -72,6 +72,24 @@ app.get('/commandes', async (req: Request, res: Response) => {
     res.send(`<pre>${JSON.stringify(uniqueResult, null, 2)}</pre>`);
 });
 
+//-----------------------------------------------------------------------------------------------------------------------------------------------
+//Boisson
+
+//
+app.get('/boissons', async (req: Request, res: Response) => {
+    const id = req.body;
+    if (JSON.stringify(id) != "{}") {
+        var result = await prisma.boisson.findMany({
+            where: {
+                OR: id
+            }
+        });
+    } else {
+        var result = await prisma.boisson.findMany()
+    }
+
+    res.send(`<pre>${JSON.stringify(result, null, 2)}</pre>`);
+})
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Box

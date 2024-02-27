@@ -43,6 +43,13 @@ model Commandes {
   boxtocom BoxToCom[]
 }
 
+model Boisson {
+  id    Int    @id @default(autoincrement())
+  nom   String
+  prix  Float
+  image String
+}
+
 model BoxToCom {
   id        Int       @id @default(autoincrement())
   boxId     Int
