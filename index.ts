@@ -14,8 +14,8 @@ type BoxWithRelations = Prisma.BoxGetPayload<{
     include: { aliments: true; saveurs: true }
 }>;
 
-type ComWithRelations = Prisma.CommandesGetPayload<{
-    include: { box: true }
+type ComWithRelations = Prisma.BoxToComGetPayload<{
+    include: { box: true; commandes: true }
 }>;
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -25,27 +25,52 @@ type ComWithRelations = Prisma.CommandesGetPayload<{
 app.get('/commandes', async (req: Request, res: Response) => {
     const id = req.body;
     if (JSON.stringify(id) != "{}") {
-        var result = await prisma.commandes.findMany({
+        var result = await prisma.boxToCom.findMany({
             where: {
                 OR: id
             },
             include: {
-                box: true
+                box: true,
+                commandes: true
             },
         });
     } else {
-        var result = await prisma.commandes.findMany({
+        var result = await prisma.boxToCom.findMany({
             include: {
-                box: true
+                box: true,
+                commandes: true
             },
         });
     }
 
-    const uniqueBox = (result as ComWithRelations[])
+    const uniqueResult = (result as ComWithRelations[]).map(com => {
+        const commandes = com.commandes;
+        let uniqueBox = Array();
 
-    res.send(`<pre>${JSON.stringify(uniqueBox, null, 2)}</pre>`);
+        if (Array.isArray(com.box)) {
+            uniqueBox = Array.from(new Set(com.box.map(b => b.nom)))
+                .map(nom => {
+                    const box = Array.isArray(com.box) ? com.box.find(b => b.nom === nom) : undefined;
+                    if (box) {
+                        return {
+                            id: box.id,
+                            nom: box.nom,
+                            prix: box.prix,
+                        };
+                    }
+                    console.log(box)
+                })
+                .filter(Boolean); // pour supprimer les valeurs undefined
+        }
+
+        return {
+            ...commandes,
+            box: uniqueBox,
+        };
+    });
+
+    res.send(`<pre>${JSON.stringify(uniqueResult, null, 2)}</pre>`);
 });
-
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
