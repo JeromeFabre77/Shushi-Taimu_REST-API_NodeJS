@@ -1,7 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
-import { PrismaClient, Box, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
+import { getAllBox } from './controllers/boxControllers';
 
 
 const prisma = new PrismaClient();
@@ -12,10 +13,6 @@ app.use(bodyParser.json());
 
 type BoxWithRelations = Prisma.BoxGetPayload<{
     include: { aliments: true; saveurs: true }
-}>;
-
-type ComWithRelations = Prisma.BoxToComGetPayload<{
-    include: { box: true; commandes: true }
 }>;
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,29 +40,41 @@ app.get('/commandes', async (req: Request, res: Response) => {
         });
     }
 
-    const uniqueResult = (result as ComWithRelations[]).map(com => {
-        const commandes = com.commandes;
-        let uniqueBox = Array();
+    // const uniqueResult = (result as ComWithRelations[]).map(com => {
+    //     const commandes = com.commandes
+    //     const box = com.box
 
-        if (Array.isArray(com.box)) {
-            uniqueBox = Array.from(new Set(com.box.map(b => b.nom)))
-                .map(nom => {
-                    const box = Array.isArray(com.box) ? com.box.find(b => b.nom === nom) : undefined;
-                    if (box) {
-                        return {
-                            id: box.id,
-                            nom: box.nom,
-                            prix: box.prix,
-                        };
-                    }
-                    console.log(box)
-                })
-                .filter(Boolean); // pour supprimer les valeurs undefined
-        }
+    //     const uniqueBox =
+    //     {
+    //         id: box.id,
+    //         nom: box.nom,
+    //         prix: box.prix,
+    //     };
+
+    //     return {
+    //         ...commandes,
+    //         box: uniqueBox,
+    //     };
+    // })
+    // res.send(`<pre>${JSON.stringify(uniqueResult, null, 1)}</pre>`);
+    const uniqueResult = (result as ComWithRelations[]).map(com => {
+        const commandes = com.commandes
+        const uniqueBox = Array.from(new Set(com.box.map(b => b.nom)))
+            .map(nom => {
+                const box = com.box.find(b => b.nom === nom);
+                if (box) {
+                    return {
+                        id: box.id,
+                        nom: box.nom,
+                        prix: box.prix,
+                    };
+                }
+            })
+            .filter(Boolean); // pour supprimer les valeurs undefined
 
         return {
             ...commandes,
-            box: uniqueBox,
+            box: com.box,
         };
     });
 
@@ -367,51 +376,7 @@ app.delete('/box/:id', async (req: Request, res: Response) => {
 });
 
 //Affichage de toutes les box si le body est vide sinon affiche par id
-app.get('/box', async (req: Request, res: Response) => {
-    const id = req.body;
-    if (JSON.stringify(id) != "{}") {
-        var result = await prisma.box.findMany({
-            where: {
-                OR: id
-            },
-            include: {
-                aliments: true,
-                saveurs: true,
-            },
-        });
-    } else {
-        var result = await prisma.box.findMany({
-            include: {
-                aliments: true,
-                saveurs: true,
-            },
-        });
-    }
-
-    const uniqueResult = (result as BoxWithRelations[]).map(box => {
-        const uniqueAliments = Array.from(new Set(box.aliments.map(a => a.nom)))
-            .map(nom => {
-                const aliment = box.aliments.find(a => a.nom === nom);
-                if (aliment) {
-                    return {
-                        nom: aliment.nom,
-                        quantite: aliment.quantite,
-                    };
-                }
-            })
-            .filter(Boolean); // pour supprimer les valeurs undefined
-
-        const uniqueSaveurs = Array.from(new Set(box.saveurs.map(s => s.nom)));
-
-        return {
-            ...box,
-            aliments: uniqueAliments,
-            saveurs: uniqueSaveurs,
-        };
-    });
-
-    res.send(`<pre>${JSON.stringify(uniqueResult, null, 2)}</pre>`);
-});
+app.get('/box', getAllBox)
 
 app.listen(port, () => {
     console.log(`Le serveur est lancé à l'adresse http://localhost:${port}`);
