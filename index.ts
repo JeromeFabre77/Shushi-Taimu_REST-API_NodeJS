@@ -1,382 +1,125 @@
 import express, { NextFunction, Request, Response } from 'express';
-import { PrismaClient, Prisma } from '@prisma/client';
-import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
-import { getAllBox } from './controllers/boxControllers';
+import { readBox, deleteBox, updateBox, createBox, createAlim, updateAlim, readAlim, deleteAlim, createSav, updateSav, readSav, deleteSav } from './controllers/boxControllers';
+import { readBoisson } from './controllers/boissonControllers';
 
-
-const prisma = new PrismaClient();
 const app = express();
 const port = 3000;
 
-app.use(bodyParser.json());
-
-type BoxWithRelations = Prisma.BoxGetPayload<{
-    include: { aliments: true; saveurs: true }
-}>;
+// type BoxWithRelations = Prisma.BoxGetPayload<{
+//     include: { aliments: true; saveurs: true }
+// }>;
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Commande
 
 //Affichage de toutes les commandes si le body est vide sinon affiche par id
-app.get('/commandes', async (req: Request, res: Response) => {
-    const id = req.body;
-    if (JSON.stringify(id) != "{}") {
-        var result = await prisma.boxToCom.findMany({
-            where: {
-                OR: id
-            },
-            include: {
-                box: true,
-                commandes: true
-            },
-        });
-    } else {
-        var result = await prisma.boxToCom.findMany({
-            include: {
-                box: true,
-                commandes: true
-            },
-        });
-    }
+// app.get('/commandes', async (req: Request, res: Response) => {
+//     const id = req.body;
+//     if (JSON.stringify(id) != "{}") {
+//         var result = await prisma.boxToCom.findMany({
+//             where: {
+//                 OR: id
+//             },
+//             include: {
+//                 box: true,
+//                 commandes: true
+//             },
+//         });
+//     } else {
+//         var result = await prisma.boxToCom.findMany({
+//             include: {
+//                 box: true,
+//                 commandes: true
+//             },
+//         });
+//     }
+// 
+// const uniqueResult = (result as ComWithRelations[]).map(com => {
+//     const commandes = com.commandes
+//     const box = com.box
 
-    // const uniqueResult = (result as ComWithRelations[]).map(com => {
-    //     const commandes = com.commandes
-    //     const box = com.box
+//     const uniqueBox =
+//     {
+//         id: box.id,
+//         nom: box.nom,
+//         prix: box.prix,
+//     };
 
-    //     const uniqueBox =
-    //     {
-    //         id: box.id,
-    //         nom: box.nom,
-    //         prix: box.prix,
-    //     };
+//     return {
+//         ...commandes,
+//         box: uniqueBox,
+//     };
+// })
+// res.send(`<pre>${JSON.stringify(uniqueResult, null, 1)}</pre>`);
+//     const uniqueResult = (result as ComWithRelations[]).map(com => {
+//         const commandes = com.commandes
+//         const uniqueBox = Array.from(new Set(com.box.map(b => b.nom)))
+//             .map(nom => {
+//                 const box = com.box.find(b => b.nom === nom);
+//                 if (box) {
+//                     return {
+//                         id: box.id,
+//                         nom: box.nom,
+//                         prix: box.prix,
+//                     };
+//                 }
+//             })
+//             .filter(Boolean); // pour supprimer les valeurs undefined
 
-    //     return {
-    //         ...commandes,
-    //         box: uniqueBox,
-    //     };
-    // })
-    // res.send(`<pre>${JSON.stringify(uniqueResult, null, 1)}</pre>`);
-    const uniqueResult = (result as ComWithRelations[]).map(com => {
-        const commandes = com.commandes
-        const uniqueBox = Array.from(new Set(com.box.map(b => b.nom)))
-            .map(nom => {
-                const box = com.box.find(b => b.nom === nom);
-                if (box) {
-                    return {
-                        id: box.id,
-                        nom: box.nom,
-                        prix: box.prix,
-                    };
-                }
-            })
-            .filter(Boolean); // pour supprimer les valeurs undefined
+//         return {
+//             ...commandes,
+//             box: com.box,
+//         };
+//     });
 
-        return {
-            ...commandes,
-            box: com.box,
-        };
-    });
-
-    res.send(`<pre>${JSON.stringify(uniqueResult, null, 2)}</pre>`);
-});
+//     res.send(`<pre>${JSON.stringify(uniqueResult, null, 2)}</pre>`);
+// });
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Boisson
 
-//
-app.get('/boissons', async (req: Request, res: Response) => {
-    const id = req.body;
-    if (JSON.stringify(id) != "{}") {
-        var result = await prisma.boisson.findMany({
-            where: {
-                OR: id
-            }
-        });
-    } else {
-        var result = await prisma.boisson.findMany()
-    }
-
-    res.send(`<pre>${JSON.stringify(result, null, 2)}</pre>`);
-})
+//Affichage de toutes les boissons si le body est vide sinon affiche par id
+app.get('/boissons', readBoisson)
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Box
 
 //Delete une saveur par id
-app.delete('/box/saveurs/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    try {
-        const deleteSav = await prisma.saveurs.delete({
-            where: {
-                id: Number(id),
-            }
-        });
-        res.json(deleteSav);
-    } catch (error) {
-        res.status(500).json({ error: 'Une erreur est survenue lors de la suppression de la saveur' });
-    }
-});
+app.delete('/box/saveurs/:id', deleteSav)
 
 //Affichage de toutes les saveurs si le body est vide sinon affiche par id
-app.get('/box/saveurs', async (req: Request, res: Response) => {
-    const id = req.body;
-    if (JSON.stringify(id) != "{}") {
-        var result = await prisma.saveurs.findMany({
-            where: {
-                OR: id
-            }
-        });
-    } else {
-        var result = await prisma.saveurs.findMany()
-    }
-
-    res.send(`<pre>${JSON.stringify(result, null, 2)}</pre>`);
-});
+app.get('/box/saveurs', readSav)
 
 //Modification d'une saveur à partir de son id
-app.put('/box/saveurs/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { nom, boxId } = req.body;
-
-    // Vérifiez si tous les champs nécessaires sont présents
-    if (!nom || !boxId) {
-        return res.status(400).json({ error: "Tous les champs sont requis" });
-    }
-
-    try {
-        const saveurs = await prisma.saveurs.findUnique({
-            where: {
-                id: Number(id)
-            }
-        });
-
-        // Vérifiez si la saveur existe
-        if (!saveurs) {
-            return res.status(404).json({ error: `Aucune saveur trouvée avec l'id ${id}` });
-        }
-
-        const updatedSav = await prisma.saveurs.update({
-            where: {
-                id: Number(id)
-            },
-            data:
-            {
-                nom: String(nom),
-                boxId: Number(boxId)
-            },
-        });
-
-        res.json(updatedSav);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: `Une erreur est survenue lors de la modification de la saveur avec l'id ${id}` });
-    }
-});
+app.put('/box/saveurs/:id', updateSav)
 
 //Création de saveurs dans une box
-app.post('/box/saveurs', async (req: Request, res: Response) => {
-    const saveurs = req.body;
-
-    if (!saveurs) {
-        return res.json(`Tous les champs sont requis`);
-    }
-
-    try {
-        const newSav = await prisma.saveurs.createMany({
-            data: saveurs,
-            skipDuplicates: true
-        })
-        res.send(newSav);
-    } catch (error) {
-        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre saveur ${JSON.stringify(saveurs)}` });
-    }
-})
+app.post('/box/saveurs', createSav)
 
 //Delete un aliment par id
-app.delete('/box/aliments/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    try {
-        const deleteAlim = await prisma.aliments.delete({
-            where: {
-                id: Number(id),
-            }
-        });
-        res.json(deleteAlim);
-    } catch (error) {
-        res.status(500).json({ error: 'Une erreur est survenue lors de la suppression de l\'aliment' });
-    }
-});
+app.delete('/box/aliments/:id', deleteAlim)
 
 //Affichage de toutes les aliments si le body est vide sinon affiche par id
-app.get('/box/aliments', async (req: Request, res: Response) => {
-    const id = req.body;
-    if (JSON.stringify(id) != "{}") {
-        var result = await prisma.aliments.findMany({
-            where: {
-                OR: id
-            }
-        });
-    } else {
-        var result = await prisma.aliments.findMany()
-    }
-
-    res.send(`<pre>${JSON.stringify(result, null, 2)}</pre>`);
-});
+app.get('/box/aliments', readAlim)
 
 //Modification d'un aliments à partir de son id
-app.put('/box/aliments/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { nom, quantite, boxId } = req.body;
-
-    // Vérifiez si tous les champs nécessaires sont présents
-    if (!nom || !quantite || !boxId) {
-        return res.status(400).json({ error: "Tous les champs sont requis" });
-    }
-
-    try {
-        const aliments = await prisma.aliments.findUnique({
-            where: {
-                id: Number(id)
-            }
-        });
-
-        // Vérifiez si l'aliment existe
-        if (!aliments) {
-            return res.status(404).json({ error: `Aucun aliment trouvée avec l'id ${id}` });
-        }
-
-        const updatedAlim = await prisma.aliments.update({
-            where: {
-                id: Number(id)
-            },
-            data:
-            {
-                nom: String(nom),
-                quantite: Number(quantite),
-                boxId: Number(boxId)
-            },
-        });
-
-        res.json(updatedAlim);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: `Une erreur est survenue lors de l'aliment de la box avec l'id ${id}` });
-    }
-});
+app.put('/box/aliments/:id', updateAlim)
 
 //Création d'aliments dans une box
-app.post('/box/aliments', async (req: Request, res: Response) => {
-    const aliments = req.body;
-
-    if (!aliments) {
-        return res.status(400).json({ error: "Tous les champs sont requis" });
-    }
-
-    try {
-        const newAlim = await prisma.aliments.createMany({
-            data: aliments,
-            skipDuplicates: true
-        })
-        res.json(newAlim);
-    } catch (error) {
-        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre saveur ${JSON.stringify(aliments)}` });
-    }
-})
+app.post('/box/aliments', createAlim)
 
 //Création de box
-app.post('/box', async (req: Request, res: Response) => {
-    const box = req.body;
-
-    if (!box) {
-        return res.json(`Tous les champs sont requis`);
-    }
-
-    try {
-        const newBox = await prisma.box.createMany({
-            data: box,
-            skipDuplicates: true
-        })
-        res.send(newBox);
-    } catch (error) {
-        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre saveur ${JSON.stringify(box)}` });
-    }
-})
+app.post('/box', createBox)
 
 //Modification d'une box par id
-app.put('/box/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { nom, pieces, prix, image } = req.body;
-
-    // Vérifiez si tous les champs nécessaires sont présents
-    if (!nom || !pieces || !prix || !image) {
-        return res.status(400).json({ error: "Tous les champs sont requis" });
-    }
-
-    try {
-        const box = await prisma.box.findUnique({
-            where: {
-                id: Number(id)
-            }
-        });
-
-        // Vérifiez si la box existe
-        if (!box) {
-            return res.status(404).json({ error: `Aucune box trouvée avec l'id ${id}` });
-        }
-
-        const updatedBox = await prisma.box.update({
-            where: {
-                id: Number(id)
-            },
-            data:
-            {
-                nom: String(nom),
-                pieces: Number(pieces),
-                prix: Number(prix),
-                image: String(image)
-            },
-        });
-
-        res.json(updatedBox);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: `Une erreur est survenue lors de la modification de la box avec l'id ${id}` });
-    }
-});
+app.put('/box/:id', updateBox)
 
 //Delete une box par id
-app.delete('/box/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    try {
-        const deleteAlim = prisma.aliments.deleteMany({
-            where: {
-                boxId: Number(id),
-            }
-        });
-        const deleteSav = prisma.saveurs.deleteMany({
-            where: {
-                boxId: Number(id),
-            }
-        });
-        const deleteBox = prisma.box.delete({
-            where: {
-                id: Number(id),
-            },
-
-        });
-        const transaction = await prisma.$transaction([deleteAlim, deleteSav, deleteBox])
-        res.json(transaction);
-    } catch (error) {
-        res.status(500).json({ error: 'Une erreur est survenue lors de la suppression de la box' });
-    }
-});
+app.delete('/box/:id', deleteBox)
 
 //Affichage de toutes les box si le body est vide sinon affiche par id
-app.get('/box', getAllBox)
+app.get('/box', readBox)
 
 app.listen(port, () => {
     console.log(`Le serveur est lancé à l'adresse http://localhost:${port}`);
