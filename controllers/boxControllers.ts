@@ -140,7 +140,7 @@ export const createBox = async (req: Request, res: Response) => {
         })
         res.send(newBox);
     } catch (error) {
-        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre saveur ${JSON.stringify(box)}` });
+        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre box ${JSON.stringify(box)}` });
     }
 }
 
@@ -158,7 +158,7 @@ export const createAlim = async (req: Request, res: Response) => {
         })
         res.json(newAlim);
     } catch (error) {
-        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre saveur ${JSON.stringify(aliments)}` });
+        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre aliment ${JSON.stringify(aliments)}` });
     }
 }
 

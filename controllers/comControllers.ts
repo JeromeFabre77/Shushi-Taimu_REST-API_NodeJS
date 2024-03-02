@@ -1,11 +1,8 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import express, { NextFunction, Request, Response } from 'express';
-import bodyParser from 'body-parser';
 
 const prisma = new PrismaClient();
 const app = express();
-
-app.use(bodyParser.json());
 
 export const readCom = async (req: Request, res: Response) => {
     const id = req.body;
@@ -18,6 +15,7 @@ export const readCom = async (req: Request, res: Response) => {
                 boxtocom: {
                     include: {
                         box: true,
+                        boisson: true,
                     }
                 }
             },
@@ -28,6 +26,7 @@ export const readCom = async (req: Request, res: Response) => {
                 boxtocom: {
                     include: {
                         box: true,
+                        boisson: true,
                     }
                 }
             },
@@ -36,21 +35,33 @@ export const readCom = async (req: Request, res: Response) => {
     const uniqueCom = result.map(b => {
 
         const uniqueBox = b.boxtocom.map(btc => {
-            return {
-                id: btc.box.id,
-                nom: btc.box.nom,
-                pieces: btc.box.pieces
+            if (btc.box) {
+                return {
+                    id: btc.box.id,
+                    nom: btc.box.nom,
+                    pieces: btc.box.pieces
+                }
+            }
+        })
+        const uniqueBoisson = b.boxtocom.map(btc => {
+            if (btc.boisson) {
+                return {
+                    id: btc.boisson.id,
+                    nom: btc.boisson.nom,
+                }
             }
         })
         const commandes = {
             id: b.id,
             date: b.date,
             prix: b.prix_t,
-            box: uniqueBox
+            box: uniqueBox,
+            boisson: uniqueBoisson
         }
 
-        return commandes
-
+        return {
+            commande: commandes,
+        }
     })
 
 
