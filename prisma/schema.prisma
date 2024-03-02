@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,50 +7,61 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Box {
+model aliments {
+  id       Int    @id @default(autoincrement())
+  nom      String
+  quantite Int
+  boxId    Int
+  box      box    @relation(fields: [boxId], references: [id], map: "Aliments_boxId_fkey")
+
+  @@index([boxId], map: "Aliments_boxId_fkey")
+}
+
+model boisson {
+  id       Int        @id @default(autoincrement())
+  nom      String
+  prix     Float
+  image    String
+  boxtocom boxtocom[]
+}
+
+model box {
   id       Int        @id @default(autoincrement())
   nom      String
   pieces   Int
   prix     Float
   image    String
-  aliments Aliments[]
-  saveurs  Saveurs[]
-  boxtocom BoxToCom[]
+  aliments aliments[]
+  boxtocom boxtocom[]
+  saveurs  saveurs[]
 }
 
-model Aliments {
-  id       Int    @id @default(autoincrement())
-  nom      String
-  quantite Int
-  boxId    Int
-  box      Box    @relation(fields: [boxId], references: [id])
+model boxtocom {
+  id        Int       @id @default(autoincrement())
+  boxId     Int?
+  comId     Int
+  boiId     Int?
+  boisson   boisson?  @relation(fields: [boiId], references: [id], onDelete: Restrict, map: "BoxToCom_boiId_fkey")
+  box       box?      @relation(fields: [boxId], references: [id], onDelete: Restrict, map: "BoxToCom_boxId_fkey")
+  commandes commandes @relation(fields: [comId], references: [id], map: "BoxToCom_comId_fkey")
+
+  @@index([boiId], map: "BoxToCom_boiId_fkey")
+  @@index([boxId], map: "BoxToCom_boxId_fkey")
+  @@index([comId], map: "BoxToCom_comId_fkey")
 }
 
-model Saveurs {
-  id    Int    @id @default(autoincrement())
-  nom   String
-  boxId Int
-  box   Box    @relation(fields: [boxId], references: [id])
-}
-
-model Commandes {
+model commandes {
   id       Int        @id @default(autoincrement())
   date     DateTime   @default(now())
   prix_t   Float
-  boxtocom BoxToCom[]
+  boxtocom boxtocom[]
 }
 
-model Boisson {
+model saveurs {
   id    Int    @id @default(autoincrement())
   nom   String
-  prix  Float
-  image String
-}
+  boxId Int
+  box   box    @relation(fields: [boxId], references: [id], map: "Saveurs_boxId_fkey")
 
-model BoxToCom {
-  id        Int       @id @default(autoincrement())
-  boxId     Int
-  box       Box       @relation(fields: [boxId], references: [id])
-  comId     Int
-  commandes Commandes @relation(fields: [comId], references: [id])
+  @@index([boxId], map: "Saveurs_boxId_fkey")
 }

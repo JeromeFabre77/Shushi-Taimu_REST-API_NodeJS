@@ -1,10 +1,13 @@
 import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import bodyParser from 'body-parser';
 import { readBox, deleteBox, updateBox, createBox, createAlim, updateAlim, readAlim, deleteAlim, createSav, updateSav, readSav, deleteSav } from './controllers/boxControllers';
 import { readBoisson } from './controllers/boissonControllers';
+import { readCom } from './controllers/comControllers';
 
 const app = express();
 const port = 3000;
+app.use(bodyParser.json());
 
 // type BoxWithRelations = Prisma.BoxGetPayload<{
 //     include: { aliments: true; saveurs: true }
@@ -14,67 +17,7 @@ const port = 3000;
 //Commande
 
 //Affichage de toutes les commandes si le body est vide sinon affiche par id
-// app.get('/commandes', async (req: Request, res: Response) => {
-//     const id = req.body;
-//     if (JSON.stringify(id) != "{}") {
-//         var result = await prisma.boxToCom.findMany({
-//             where: {
-//                 OR: id
-//             },
-//             include: {
-//                 box: true,
-//                 commandes: true
-//             },
-//         });
-//     } else {
-//         var result = await prisma.boxToCom.findMany({
-//             include: {
-//                 box: true,
-//                 commandes: true
-//             },
-//         });
-//     }
-// 
-// const uniqueResult = (result as ComWithRelations[]).map(com => {
-//     const commandes = com.commandes
-//     const box = com.box
-
-//     const uniqueBox =
-//     {
-//         id: box.id,
-//         nom: box.nom,
-//         prix: box.prix,
-//     };
-
-//     return {
-//         ...commandes,
-//         box: uniqueBox,
-//     };
-// })
-// res.send(`<pre>${JSON.stringify(uniqueResult, null, 1)}</pre>`);
-//     const uniqueResult = (result as ComWithRelations[]).map(com => {
-//         const commandes = com.commandes
-//         const uniqueBox = Array.from(new Set(com.box.map(b => b.nom)))
-//             .map(nom => {
-//                 const box = com.box.find(b => b.nom === nom);
-//                 if (box) {
-//                     return {
-//                         id: box.id,
-//                         nom: box.nom,
-//                         prix: box.prix,
-//                     };
-//                 }
-//             })
-//             .filter(Boolean); // pour supprimer les valeurs undefined
-
-//         return {
-//             ...commandes,
-//             box: com.box,
-//         };
-//     });
-
-//     res.send(`<pre>${JSON.stringify(uniqueResult, null, 2)}</pre>`);
-// });
+app.get('/commandes', readCom)
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Boisson
