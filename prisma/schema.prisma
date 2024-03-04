@@ -26,14 +26,15 @@ model boisson {
 }
 
 model box {
-  id       Int        @id @default(autoincrement())
-  nom      String
-  pieces   Int
-  prix     Float
-  image    String
-  aliments aliments[]
-  boxtocom boxtocom[]
-  saveurs  saveurs[]
+  id        Int        @id @default(autoincrement())
+  nom       String
+  pieces    Int
+  prix      Float
+  image     String
+  categorie String?
+  aliments  aliments[]
+  boxtocom  boxtocom[]
+  saveurs   saveurs[]
 }
 
 model boxtocom {
@@ -52,8 +53,9 @@ model boxtocom {
 
 model commandes {
   id       Int        @id @default(autoincrement())
-  date     DateTime?  @default(now()) @db.Timestamp(3)
+  date     DateTime   @default(now()) @db.Timestamp(0)
   prix_t   Float
+  statut   Int        @default(0)
   boxtocom boxtocom[]
 }
 
