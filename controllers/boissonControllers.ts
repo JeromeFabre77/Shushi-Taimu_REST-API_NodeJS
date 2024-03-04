@@ -19,5 +19,5 @@ export const readBoisson = async (req: Request, res: Response) => {
         var result = await prisma.boisson.findMany()
     }
 
-    res.send(`<pre>${JSON.stringify(result, null, 2)}</pre>`);
+    res.send(JSON.stringify(result, null, 2));
 }

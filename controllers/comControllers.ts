@@ -65,5 +65,5 @@ export const readCom = async (req: Request, res: Response) => {
     })
 
 
-    res.send(`<pre>${JSON.stringify(uniqueCom, null, 2)}</pre>`);
+    res.send(JSON.stringify(uniqueCom, null, 2));
 };

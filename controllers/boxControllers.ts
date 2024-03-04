@@ -52,7 +52,7 @@ export const readBox = async (req: Request, res: Response) => {
             };
         });
 
-        res.send(`<pre>${JSON.stringify(uniqueResult, null, 2)}</pre>`);
+        res.send(JSON.stringify(uniqueResult, null, 2));
     } catch (error) {
         res.status(500).send({ error: 'Erreur lors de la récupération des boîtes' });
     }
@@ -214,7 +214,7 @@ export const readAlim = async (req: Request, res: Response) => {
         var result = await prisma.aliments.findMany()
     }
 
-    res.send(`<pre>${JSON.stringify(result, null, 2)}</pre>`);
+    res.send(JSON.stringify(result, null, 2));
 }
 
 export const deleteAlim = async (req: Request, res: Response) => {
@@ -301,7 +301,7 @@ export const readSav = async (req: Request, res: Response) => {
         var result = await prisma.saveurs.findMany()
     }
 
-    res.send(`<pre>${JSON.stringify(result, null, 2)}</pre>`);
+    res.send(JSON.stringify(result, null, 2));
 }
 
 export const deleteSav = async (req: Request, res: Response) => {
