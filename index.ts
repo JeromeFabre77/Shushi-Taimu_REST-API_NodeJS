@@ -1,17 +1,15 @@
 import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import { readBox, deleteBox, updateBox, createBox, createAlim, updateAlim, readAlim, deleteAlim, createSav, updateSav, readSav, deleteSav } from './controllers/boxControllers';
 import { readBoisson } from './controllers/boissonControllers';
 import { readCom } from './controllers/comControllers';
 
 const app = express();
 const port = 3000;
+app.use(cors());
 app.use(bodyParser.json());
-
-// type BoxWithRelations = Prisma.BoxGetPayload<{
-//     include: { aliments: true; saveurs: true }
-// }>;
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Commande
