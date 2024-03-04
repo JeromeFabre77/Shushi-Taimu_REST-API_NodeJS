@@ -52,7 +52,7 @@ model boxtocom {
 
 model commandes {
   id       Int        @id @default(autoincrement())
-  date     DateTime   @default(now())
+  date     DateTime?  @default(now()) @db.Timestamp(3)
   prix_t   Float
   boxtocom boxtocom[]
 }
