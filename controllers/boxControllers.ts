@@ -33,6 +33,7 @@ export const readBox = async (req: Request, res: Response) => {
             const uniqueAliments = box.aliments.map((alim) => {
                 if (alim) {
                     return {
+                        id: alim.id,
                         nom: alim.nom,
                         quantity: alim.quantite,
                     };
@@ -41,6 +42,7 @@ export const readBox = async (req: Request, res: Response) => {
             const uniqueSaveurs = box.saveurs.map((sav) => {
                 if (sav) {
                     return {
+                        id: sav.id,
                         nom: sav.nom,
                     };
                 }
