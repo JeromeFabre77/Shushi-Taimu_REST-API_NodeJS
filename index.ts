@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { readBox, deleteBox, updateBox, createBox, createAlim, updateAlim, readAlim, deleteAlim, createSav, updateSav, readSav, deleteSav } from './controllers/boxControllers';
 import { readBoisson, createBoi, updateBoi, deleteBoi } from './controllers/boissonControllers';
-import { readCom } from './controllers/comControllers';
+import { readCom, createCom, createBtc } from './controllers/comControllers';
 
 const app = express();
 const port = 3000;
@@ -14,8 +14,14 @@ app.use(bodyParser.json());
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Commande
 
-//Affichage de toutes les commandes si le body est vide sinon affiche par id
+//Affichage de toutes les commandes si le body est vide sinon affiche par id 
 app.get('/commandes', readCom)
+
+//Création de boisson d'une commande
+app.post('/commandes', createCom)
+
+//Création de boisson d'une commande
+app.post('/commandes/btc', createBtc)
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Boisson

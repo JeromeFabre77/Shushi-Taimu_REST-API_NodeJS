@@ -67,3 +67,45 @@ export const readCom = async (req: Request, res: Response) => {
 
     res.send(JSON.stringify(uniqueCom, null, 2));
 };
+
+export const createCom = async (req: Request, res: Response) => {
+    const { prix_t } = req.body;
+
+    if (!prix_t) {
+        return res.status(400).json({ error: "Tous les champs sont requis" });
+    }
+
+    try {
+
+        const newCom = await prisma.commandes.create({
+            data: {
+                prix_t: Number(prix_t)
+            }
+        })
+
+        res.json(newCom);
+
+    } catch (error) {
+        res.status(500).json({ error: 'Une erreur est survenue lors de la création de votre commandes' });
+    }
+}
+
+export const createBtc = async (req: Request, res: Response) => {
+    const commandes = req.body;
+
+    if (!commandes) {
+        return res.status(400).json({ error: "Tous les champs sont requis" });
+    }
+
+    try {
+        const newBtc = await prisma.boxtocom.createMany({
+            data: commandes,
+            skipDuplicates: true
+        })
+
+        res.json(newBtc);
+
+    } catch (error) {
+        res.status(500).json({ error: `Une erreur est survenue lors de la création de votre commandes ${JSON.stringify(commandes)}` });
+    }
+}
