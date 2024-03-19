@@ -89,10 +89,10 @@ export const deleteBox = async (req: Request, res: Response) => {
 
 export const updateBox = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { nom, pieces, prix, image } = req.body;
+    const { nom, pieces, prix, categorie, image } = req.body;
 
     // Vérifiez si tous les champs nécessaires sont présents
-    if (!nom || !pieces || !prix || !image) {
+    if (!nom || !pieces || !prix || !image || !categorie) {
         return res.status(400).json({ error: "Tous les champs sont requis" });
     }
 
@@ -117,6 +117,7 @@ export const updateBox = async (req: Request, res: Response) => {
                 nom: String(nom),
                 pieces: Number(pieces),
                 prix: Number(prix),
+                categorie: String(categorie),
                 image: String(image)
             },
         });
