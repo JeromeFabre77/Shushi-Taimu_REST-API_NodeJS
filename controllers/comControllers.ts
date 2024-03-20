@@ -55,6 +55,7 @@ export const readCom = async (req: Request, res: Response) => {
             id: b.id,
             date: b.date,
             prix: b.prix_t,
+            statut: b.statut,
             box: uniqueBox,
             boisson: uniqueBoisson
         }
@@ -107,5 +108,33 @@ export const createBtc = async (req: Request, res: Response) => {
 
     } catch (error) {
         res.status(500).json({ error: `Une erreur est survenue lors de la création de votre commandes ${JSON.stringify(commandes)}` });
+    }
+}
+
+export const updateCom = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { statut } = req.body;
+
+    // Vérifiez si tous les champs nécessaires sont présents
+    if (!statut) {
+        return res.status(400).json({ error: "Tous les champs sont requis" });
+    }
+
+    try {
+
+        const updatedBox = await prisma.commandes.update({
+            where: {
+                id: Number(id)
+            },
+            data:
+            {
+                statut: Number(statut)
+            },
+        });
+
+        res.json(updatedBox);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: `Une erreur est survenue lors de la modification de la commande avec l'id ${id}` });
     }
 }
