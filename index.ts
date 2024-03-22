@@ -23,7 +23,7 @@ app.post('/commandes', createCom)
 //Création de boisson d'une commande
 app.post('/commandes/btc', createBtc)
 
-app.put('commandes/:id', updateCom)
+app.put('/commandes/:id', updateCom)
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Boisson
