@@ -3,41 +3,11 @@ import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import { readBox, deleteBox, updateBox, createBox, createAlim, updateAlim, readAlim, deleteAlim, createSav, updateSav, readSav, deleteSav } from './controllers/boxControllers';
-import { readBoisson, createBoi, updateBoi, deleteBoi } from './controllers/boissonControllers';
-import { readCom, createCom, createBtc, updateCom } from './controllers/comControllers';
 
 const app = express();
 const port = 3000;
 app.use(cors());
 app.use(bodyParser.json());
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-//Commande
-
-//Affichage de toutes les commandes si le body est vide sinon affiche par id 
-app.get('/commandes', readCom)
-
-//Création de boisson d'une commande
-app.post('/commandes', createCom)
-
-//Création de boisson d'une commande
-app.post('/commandes/btc', createBtc)
-
-app.put('/commandes/:id', updateCom)
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------
-//Boisson
-
-//Affichage de toutes les boissons si le body est vide sinon affiche par id
-app.get('/boissons', readBoisson)
-
-//Modification d'une boisson à partir de son id
-app.put('/boissons/:id', updateBoi)
-
-//Création de boisson dans une box
-app.post('/boissons', createBoi)
-
-app.delete('/boissons/:id', deleteBoi)
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 //Box

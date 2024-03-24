@@ -17,46 +17,14 @@ model aliments {
   @@index([boxId], map: "Aliments_boxId_fkey")
 }
 
-model boisson {
+model box {
   id       Int        @id @default(autoincrement())
   nom      String
+  pieces   Int
   prix     Float
   image    String
-  boxtocom boxtocom[]
-}
-
-model box {
-  id        Int        @id @default(autoincrement())
-  nom       String
-  pieces    Int
-  prix      Float
-  image     String
-  categorie String?
-  aliments  aliments[]
-  boxtocom  boxtocom[]
-  saveurs   saveurs[]
-}
-
-model boxtocom {
-  id        Int       @id @default(autoincrement())
-  boxId     Int?
-  comId     Int
-  boiId     Int?
-  boisson   boisson?  @relation(fields: [boiId], references: [id], onDelete: Restrict, map: "BoxToCom_boiId_fkey")
-  box       box?      @relation(fields: [boxId], references: [id], onDelete: Restrict, map: "BoxToCom_boxId_fkey")
-  commandes commandes @relation(fields: [comId], references: [id], map: "BoxToCom_comId_fkey")
-
-  @@index([boiId], map: "BoxToCom_boiId_fkey")
-  @@index([boxId], map: "BoxToCom_boxId_fkey")
-  @@index([comId], map: "BoxToCom_comId_fkey")
-}
-
-model commandes {
-  id       Int        @id @default(autoincrement())
-  date     DateTime   @default(now()) @db.Timestamp(0)
-  prix_t   Float
-  statut   Int        @default(0)
-  boxtocom boxtocom[]
+  aliments aliments[]
+  saveurs  saveurs[]
 }
 
 model saveurs {
