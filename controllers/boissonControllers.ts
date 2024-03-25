@@ -83,7 +83,7 @@ export const deleteBoi = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     try {
-        const deleteBoi = await prisma.aliments.delete({
+        const deleteBoi = await prisma.boisson.delete({
             where: {
                 id: Number(id),
             }
